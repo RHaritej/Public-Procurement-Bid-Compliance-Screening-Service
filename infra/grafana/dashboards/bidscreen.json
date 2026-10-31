@@ -1,0 +1,103 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Screening Run Duration (p95)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(bidscreen_run_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95 Latency (s)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s", "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 45, "color": "orange" }, { "value": 60, "color": "red" }] } }
+      }
+    },
+    {
+      "title": "Runs Processed / Min by Route",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 10, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (route) (rate(bidscreen_runs_total[1m]) * 60)",
+          "legendFormat": "{{route}}"
+        }
+      ]
+    },
+    {
+      "title": "Circuit Breaker State",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "bidscreen_circuit_state",
+          "legendFormat": "State (0=Closed, 2=Open)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "HEALTHY", "color": "green" }, "1": { "text": "HALF-OPEN", "color": "yellow" }, "2": { "text": "OPEN (TRIPPED)", "color": "red" } } }] }
+      }
+    },
+    {
+      "title": "Cumulative LLM Cost (USD)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(bidscreen_llm_cost_usd_total)",
+          "legendFormat": "Cost ($)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+    },
+    {
+      "title": "Quarantined Requests Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "rate(bidscreen_quarantine_total[1m]) * 60",
+          "legendFormat": "Quarantine / min"
+        }
+      ]
+    },
+    {
+      "title": "Rate Limited Requests (HTTP 429)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 6 },
+      "targets": [
+        {
+          "expr": "rate(bidscreen_rate_limit_total[1m]) * 60",
+          "legendFormat": "429 / min"
+        }
+      ]
+    },
+    {
+      "title": "Indexed Chunks in Vector Store",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 6 },
+      "targets": [
+        {
+          "expr": "bidscreen_index_chunks",
+          "legendFormat": "Chunks"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["bidscreen", "procurement"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "utc",
+  "title": "Bid Compliance Screening Service - Reliability & SLO Dashboard",
+  "uid": "bidscreen-main"
+}

@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "BidderCategory": {
+      "enum": ["LARGE", "MSE", "STARTUP", "CONSORTIUM", "FOREIGN"],
+      "title": "BidderCategory",
+      "type": "string",
+      "description": "Classification of the bidding entity as declared in the bid."
+    },
+    "SimilarService": {
+      "properties": {
+        "contract_value_lakh": {
+          "exclusiveMinimum": 0,
+          "title": "Contract Value Lakh",
+          "type": "number",
+          "description": "Contract value in Indian Rupees lakh."
+        },
+        "client_type": {
+          "enum": ["CENTRAL", "STATE", "PSU"],
+          "title": "Client Type",
+          "type": "string",
+          "description": "Type of client organisation."
+        }
+      },
+      "required": ["contract_value_lakh", "client_type"],
+      "title": "SimilarService",
+      "type": "object"
+    },
+    "BidderInfo": {
+      "properties": {
+        "name": {
+          "maxLength": 200,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string",
+          "description": "Legal name of the bidding entity."
+        },
+        "declared_category": {
+          "$ref": "#/$defs/BidderCategory"
+        },
+        "country_code": {
+          "maxLength": 2,
+          "minLength": 2,
+          "title": "Country Code",
+          "type": "string",
+          "description": "ISO-3166-1 alpha-2 country code of the bidder."
+        },
+        "land_border_registered": {
+          "anyOf": [{"type": "boolean"}, {"type": "null"}],
+          "default": null,
+          "title": "Land Border Registered",
+          "description": "Whether the bidder is registered with the competent authority for land-border countries (MC-07)."
+        },
+        "incorporation_date": {
+          "format": "date",
+          "title": "Incorporation Date",
+          "type": "string",
+          "description": "Date of incorporation / registration. Must not be in the future."
+        },
+        "udyam_number": {
+          "anyOf": [{"type": "string"}, {"type": "null"}],
+          "default": null,
+          "title": "Udyam Number",
+          "description": "MSME Udyam Registration Number."
+        },
+        "startup_certificate_number": {
+          "anyOf": [{"type": "string"}, {"type": "null"}],
+          "default": null,
+          "title": "Startup Certificate Number",
+          "description": "DPIIT Startup Recognition Certificate number. System does not decide startup recognition."
+        },
+        "annual_turnover_lakh": {
+          "items": {"type": "number"},
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Annual Turnover Lakh",
+          "type": "array",
+          "description": "Annual turnover in INR lakh for the last three financial years (oldest first: FY-3, FY-2, FY-1)."
+        },
+        "years_experience": {
+          "minimum": 0,
+          "title": "Years Experience",
+          "type": "number",
+          "description": "Total years of relevant service experience."
+        },
+        "similar_services": {
+          "default": [],
+          "items": {"$ref": "#/$defs/SimilarService"},
+          "title": "Similar Services",
+          "type": "array",
+          "description": "List of prior similar service contracts (for MC-03 / MC-04)."
+        },
+        "manpower_payroll_percent": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Manpower Payroll Percent",
+          "type": "number",
+          "description": "Percentage of total manpower on payroll for at least one year (MC-05)."
+        },
+        "emd_submitted": {
+          "title": "Emd Submitted",
+          "type": "boolean",
+          "description": "Whether Earnest Money Deposit has been submitted."
+        },
+        "emd_amount_inr": {
+          "anyOf": [{"minimum": 0, "type": "number"}, {"type": "null"}],
+          "default": null,
+          "title": "Emd Amount Inr",
+          "description": "EMD amount in INR as submitted (MC-01 threshold: 117,600)."
+        },
+        "emd_exemption_claimed": {
+          "default": false,
+          "title": "Emd Exemption Claimed",
+          "type": "boolean",
+          "description": "Whether the bidder has claimed EMD exemption."
+        },
+        "office_in_consignee_state": {
+          "title": "Office In Consignee State",
+          "type": "boolean",
+          "description": "Whether the bidder has a service office in the consignee's state (MC-08)."
+        },
+        "documents_submitted": {
+          "default": [],
+          "items": {"type": "string"},
+          "title": "Documents Submitted",
+          "type": "array",
+          "description": "List of document identifiers / names submitted with the bid (MC-06)."
+        }
+      },
+      "required": [
+        "name", "declared_category", "country_code", "incorporation_date",
+        "annual_turnover_lakh", "years_experience", "manpower_payroll_percent",
+        "emd_submitted", "office_in_consignee_state"
+      ],
+      "title": "BidderInfo",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "bid_ref": {
+      "maxLength": 40,
+      "minLength": 6,
+      "title": "Bid Ref",
+      "type": "string",
+      "description": "Unique bid reference identifier assigned by the procuring entity."
+    },
+    "tender_id": {
+      "title": "Tender Id",
+      "type": "string",
+      "description": "Must equal 'GEM/2026/B/8034326'.",
+      "const": "GEM/2026/B/8034326"
+    },
+    "bidder": {
+      "$ref": "#/$defs/BidderInfo"
+    },
+    "notes": {
+      "anyOf": [{"type": "string"}, {"type": "null"}],
+      "default": null,
+      "title": "Notes",
+      "description": "Free-text notes. GUARDRAIL SCANNING REQUIRED before processing."
+    }
+  },
+  "required": ["bid_ref", "tender_id", "bidder"],
+  "title": "BidSummary",
+  "type": "object",
+  "examples": [
+    {
+      "bid_ref": "BID-2026-001",
+      "tender_id": "GEM/2026/B/8034326",
+      "bidder": {
+        "name": "Acme Solutions Pvt Ltd",
+        "declared_category": "LARGE",
+        "country_code": "IN",
+        "incorporation_date": "2010-04-01",
+        "annual_turnover_lakh": [280.0, 310.0, 340.0],
+        "years_experience": 8.0,
+        "similar_services": [{"contract_value_lakh": 100.0, "client_type": "CENTRAL"}],
+        "manpower_payroll_percent": 35.0,
+        "emd_submitted": true,
+        "emd_amount_inr": 117600.0,
+        "emd_exemption_claimed": false,
+        "office_in_consignee_state": true,
+        "documents_submitted": ["TechBid.pdf", "FinancialBid.pdf", "EMD_Receipt.pdf"]
+      },
+      "notes": null
+    }
+  ]
+}

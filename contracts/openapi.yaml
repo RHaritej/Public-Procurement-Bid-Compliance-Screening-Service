@@ -1,0 +1,468 @@
+openapi: "3.1.0"
+info:
+  title: Public Procurement Bid Compliance Screening Service
+  version: "0.1.0"
+  description: |
+    AI-powered mandatory-condition screening for GeM tender GEM/2026/B/8034326.
+
+    **IMPORTANT**: This system recommends a route only. It NEVER rejects or
+    qualifies a bid. Final authority rests with the procuring entity.
+  contact:
+    name: Team MLSD
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+
+tags:
+  - name: runs
+    description: Screening run lifecycle
+  - name: health
+    description: Service health
+
+paths:
+  /runs:
+    post:
+      operationId: submitRun
+      tags: [runs]
+      summary: Submit a bid for compliance screening
+      description: |
+        Validates the BidSummary, scans notes for prompt injection, queues a Celery
+        screening task, and returns a run_id for polling.
+        Invalid bids are quarantined and never create a run row.
+      parameters:
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunSubmission"
+      responses:
+        "202":
+          description: Run accepted and queued
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunAccepted"
+        "400":
+          description: Validation error — bid quarantined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "422":
+          description: Guardrail block — notes field contained injection attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardrailBlockResponse"
+        "429":
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitResponse"
+
+  /runs/{run_id}:
+    get:
+      operationId: getRunStatus
+      tags: [runs]
+      summary: Poll screening run status or retrieve result
+      parameters:
+        - $ref: "#/components/parameters/RunID"
+        - $ref: "#/components/parameters/CorrelationID"
+      responses:
+        "200":
+          description: Run status or completed screening result
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationID"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/RunStatusResponse"
+                  - $ref: "#/components/schemas/ScreeningResult"
+        "404":
+          description: Run not found
+
+  /runs/{run_id}/feedback:
+    post:
+      operationId: submitFeedback
+      tags: [runs]
+      summary: Submit human-in-the-loop feedback on a completed run
+      parameters:
+        - $ref: "#/components/parameters/RunID"
+        - $ref: "#/components/parameters/CorrelationID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackSubmission"
+      responses:
+        "200":
+          description: Feedback recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Feedback recorded."
+        "404":
+          description: Run not found
+
+  /health:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Service health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+components:
+  parameters:
+    RunID:
+      name: run_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CorrelationID:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+
+  headers:
+    CorrelationID:
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    BidderCategory:
+      type: string
+      enum: [LARGE, MSE, STARTUP, CONSORTIUM, FOREIGN]
+
+    Route:
+      type: string
+      enum:
+        - PASS_TO_TECHNICAL_EVALUATION
+        - SEEK_CLARIFICATION
+        - REJECT_WITH_CITED_CONDITION
+        - ESCALATE_TO_HUMAN
+
+    FindingStatus:
+      type: string
+      enum: [MET, UNMET, CONFLICT, NOT_VERIFIABLE, NOT_APPLICABLE]
+
+    EscalationReason:
+      type: string
+      enum:
+        - RULE_CONFLICT
+        - CATEGORY_UNCLEAR
+        - NO_EVIDENCE_IN_CORPUS
+        - VERIFICATION_FAILED
+        - BUDGET_EXHAUSTED
+        - PROVIDER_UNAVAILABLE
+        - GUARDRAIL_BLOCK
+
+    RunStatus:
+      type: string
+      enum: [QUEUED, RUNNING, COMPLETED, FAILED]
+
+    SimilarService:
+      type: object
+      required: [contract_value_lakh, client_type]
+      properties:
+        contract_value_lakh:
+          type: number
+          exclusiveMinimum: 0
+        client_type:
+          type: string
+          enum: [CENTRAL, STATE, PSU]
+
+    BidderInfo:
+      type: object
+      required:
+        - name
+        - declared_category
+        - country_code
+        - incorporation_date
+        - annual_turnover_lakh
+        - years_experience
+        - manpower_payroll_percent
+        - emd_submitted
+        - office_in_consignee_state
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 200
+        declared_category:
+          $ref: "#/components/schemas/BidderCategory"
+        country_code:
+          type: string
+          minLength: 2
+          maxLength: 2
+        land_border_registered:
+          type: boolean
+          nullable: true
+        incorporation_date:
+          type: string
+          format: date
+        udyam_number:
+          type: string
+          nullable: true
+        startup_certificate_number:
+          type: string
+          nullable: true
+        annual_turnover_lakh:
+          type: array
+          items:
+            type: number
+          minItems: 3
+          maxItems: 3
+        years_experience:
+          type: number
+          minimum: 0
+        similar_services:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimilarService"
+        manpower_payroll_percent:
+          type: number
+          minimum: 0
+          maximum: 100
+        emd_submitted:
+          type: boolean
+        emd_amount_inr:
+          type: number
+          minimum: 0
+          nullable: true
+        emd_exemption_claimed:
+          type: boolean
+          default: false
+        office_in_consignee_state:
+          type: boolean
+        documents_submitted:
+          type: array
+          items:
+            type: string
+
+    BidSummary:
+      type: object
+      required: [bid_ref, tender_id, bidder]
+      properties:
+        bid_ref:
+          type: string
+          minLength: 6
+          maxLength: 40
+        tender_id:
+          type: string
+          const: "GEM/2026/B/8034326"
+        bidder:
+          $ref: "#/components/schemas/BidderInfo"
+        notes:
+          type: string
+          nullable: true
+
+    RunSubmission:
+      type: object
+      required: [bid_summary]
+      properties:
+        bid_summary:
+          $ref: "#/components/schemas/BidSummary"
+        correlation_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    RunAccepted:
+      type: object
+      required: [run_id, correlation_id, status]
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        correlation_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/RunStatus"
+
+    RunStatusResponse:
+      type: object
+      required: [run_id, correlation_id, bid_ref, status, created_at, updated_at]
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        correlation_id:
+          type: string
+          format: uuid
+        bid_ref:
+          type: string
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        error_message:
+          type: string
+          nullable: true
+
+    Citation:
+      type: object
+      required: [clause_id, quoted_text]
+      properties:
+        clause_id:
+          type: string
+        quoted_text:
+          type: string
+          minLength: 1
+
+    ScreeningFinding:
+      type: object
+      required: [condition_id, condition_name, status]
+      properties:
+        condition_id:
+          type: string
+        condition_name:
+          type: string
+        status:
+          $ref: "#/components/schemas/FindingStatus"
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        advisory_note:
+          type: string
+          nullable: true
+
+    ScreeningResult:
+      type: object
+      required: [run_id, correlation_id, bid_ref, tender_id, status, recommended_route, findings]
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        correlation_id:
+          type: string
+          format: uuid
+        bid_ref:
+          type: string
+        tender_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        recommended_route:
+          $ref: "#/components/schemas/Route"
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScreeningFinding"
+        escalation_reason:
+          $ref: "#/components/schemas/EscalationReason"
+          nullable: true
+        summary_advisory:
+          type: string
+          nullable: true
+        agent_steps:
+          type: integer
+        tool_calls:
+          type: integer
+        llm_cost_usd:
+          type: number
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    FeedbackSubmission:
+      type: object
+      required: [route_agreed]
+      properties:
+        route_agreed:
+          type: boolean
+          description: Whether the procuring officer agrees with the recommended route.
+        comment:
+          type: string
+          nullable: true
+
+    ValidationErrorResponse:
+      type: object
+      required: [detail, field_errors]
+      properties:
+        detail:
+          type: string
+        field_errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    GuardrailBlockResponse:
+      type: object
+      required: [detail, escalation_reason]
+      properties:
+        detail:
+          type: string
+        escalation_reason:
+          type: string
+          const: GUARDRAIL_BLOCK
+
+    RateLimitResponse:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          example: "Rate limit exceeded. Retry after 60 seconds."
+        retry_after_seconds:
+          type: integer
+
+    HealthResponse:
+      type: object
+      required: [status, service, version]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        version:
+          type: string
+        dependencies:
+          type: object
+          additionalProperties:
+            type: string

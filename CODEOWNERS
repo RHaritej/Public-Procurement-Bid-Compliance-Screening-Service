@@ -1,0 +1,53 @@
+# Single Source of Truth for File & Component Ownership
+# Mini Project 06 - Bid Compliance Screening Service
+
+# Member A - Platform, Contracts & Reliability
+README.md                               @member-A
+docker-compose.yml                      @member-A
+.env.example                            @member-A
+Makefile                                @member-A
+CODEOWNERS                              @member-A
+contracts/                              @member-A
+services/api/                           @member-A
+services/worker/                        @member-A
+services/llm_stub/                      @member-A
+services/web/                           @member-A
+packages/common/                        @member-A
+loadtest/                               @member-A
+infra/                                  @member-A
+scripts/                                @member-A
+tests/api/                              @member-A
+docs/data_contract.md                   @member-A
+docs/slo.md                             @member-A
+docs/runbook.md                         @member-A
+docs/architecture.md                    @member-A
+
+# Member B - Knowledge, Ingestion, Retrieval & Safety
+corpus/                                 @member-B
+ingestion/                              @member-B
+services/retrieval/                     @member-B
+packages/guardrails/                    @member-B
+eval/scenarios/                         @member-B
+docs/corpus_and_chunking.md             @member-B
+docs/guardrails.md                      @member-B
+tests/ingestion/                        @member-B
+tests/retrieval/                        @member-B
+tests/guardrails/                       @member-B
+
+# Member C - Agents, LLM Gateway & Evaluation
+packages/agents/                        @member-C
+packages/llm_gateway/                   @member-C
+prompts/                                @member-C
+eval/run_eval.py                        @member-C
+eval/metrics.py                         @member-C
+eval/reports/                           @member-C
+docs/agent_design.md                    @member-C
+docs/prompts.md                         @member-C
+docs/eval_report.md                     @member-C
+docs/cost_report.md                     @member-C
+tests/agents/                           @member-C
+tests/gateway/                          @member-C
+
+# Shared (All append)
+docs/incident_log.md                    @member-A @member-B @member-C
+docs/report/                            @member-A @member-B @member-C

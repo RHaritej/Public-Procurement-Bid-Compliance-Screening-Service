@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "bidscreen-api"
+    static_configs:
+      - targets: ["api:8000"]
+    metrics_path: "/metrics"
+
+  - job_name: "bidscreen-worker"
+    static_configs:
+      - targets: ["worker:8001"]
+    metrics_path: "/metrics"
+
+  - job_name: "bidscreen-retrieval"
+    static_configs:
+      - targets: ["retrieval:8002"]
+    metrics_path: "/metrics"
+
+  - job_name: "bidscreen-llm-stub"
+    static_configs:
+      - targets: ["llm-stub:8003"]
+    metrics_path: "/metrics"

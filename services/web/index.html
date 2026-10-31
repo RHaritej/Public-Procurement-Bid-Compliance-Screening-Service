@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Procurement Bid Compliance Screening Service</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .header-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 2rem 0; margin-bottom: 2rem; border-bottom: 4px solid #3b82f6; }
+    .card { border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .badge-route { font-size: 1rem; padding: 0.5rem 1rem; border-radius: 30px; font-weight: 600; text-transform: uppercase; }
+    .route-pass { background-color: #10b981; color: white; }
+    .route-reject { background-color: #ef4444; color: white; }
+    .route-escalate { background-color: #f59e0b; color: white; }
+    .route-clarify { background-color: #3b82f6; color: white; }
+    .status-badge { font-size: 0.8rem; font-weight: 600; border-radius: 6px; padding: 0.25rem 0.6rem; }
+    .status-MET { background-color: #d1fae5; color: #065f46; }
+    .status-UNMET { background-color: #fee2e2; color: #991b1b; }
+    .status-CONFLICT { background-color: #fef3c7; color: #92400e; }
+    .status-NOT_VERIFIABLE { background-color: #e0e7ff; color: #3730a3; }
+    .citation-box { background-color: #f1f5f9; border-left: 3px solid #64748b; padding: 0.5rem 0.75rem; font-size: 0.85rem; margin-top: 0.35rem; }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="container">
+      <h1 class="h3 fw-bold mb-1">GeM Bid Compliance Screening Service</h1>
+      <p class="text-secondary mb-0">Tender: <span class="text-warning fw-semibold">GEM/2026/B/8034326</span> | Autonomous Pre-Qualification & Multi-Hop Corpus Verification</p>
+    </div>
+  </div>
+
+  <div class="container pb-5">
+    <div class="row g-4">
+
+      <!-- Left Column: Bid Submission Form -->
+      <div class="col-lg-5">
+        <div class="card p-4">
+          <h2 class="h5 fw-bold mb-3 text-dark">Submit Bid for Screening</h2>
+          <form id="screening-form">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Bid Reference</label>
+              <input type="text" id="bid_ref" class="form-control form-control-sm" value="BID-TEST-2026-001" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Tender ID</label>
+              <input type="text" id="tender_id" class="form-control form-control-sm" value="GEM/2026/B/8034326" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Bidder Legal Name</label>
+              <input type="text" id="bidder_name" class="form-control form-control-sm" value="Sandes Tech Labs Pvt Ltd" required>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Category</label>
+                <select id="declared_category" class="form-select form-select-sm">
+                  <option value="STARTUP" selected>STARTUP</option>
+                  <option value="MSE">MSE</option>
+                  <option value="LARGE">LARGE</option>
+                  <option value="CONSORTIUM">CONSORTIUM</option>
+                  <option value="FOREIGN">FOREIGN</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Country Code</label>
+                <input type="text" id="country_code" class="form-control form-control-sm" value="IN" maxlength="2" required>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Incorporation Date</label>
+                <input type="date" id="incorporation_date" class="form-control form-control-sm" value="2023-04-01" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Experience (Years)</label>
+                <input type="number" step="0.5" id="years_experience" class="form-control form-control-sm" value="2.0" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Annual Turnover (Last 3 FY, in INR Lakh)</label>
+              <div class="row g-2">
+                <div class="col-4"><input type="number" id="to_1" class="form-control form-control-sm" value="40" placeholder="FY 23-24"></div>
+                <div class="col-4"><input type="number" id="to_2" class="form-control form-control-sm" value="120" placeholder="FY 24-25"></div>
+                <div class="col-4"><input type="number" id="to_3" class="form-control form-control-sm" value="200" placeholder="FY 25-26"></div>
+              </div>
+              <div class="form-text small">Section 4.1 test case average: 120 Lakh (Below 235 Lakh threshold)</div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">DPIIT Cert / Udyam No.</label>
+                <input type="text" id="cert_number" class="form-control form-control-sm" value="DPIIT-TEST-0001">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Manpower Payroll %</label>
+                <input type="number" id="payroll_pct" class="form-control form-control-sm" value="20" required>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <div class="form-check form-switch pt-2">
+                  <input class="form-check-input" type="checkbox" id="emd_submitted" checked>
+                  <label class="form-check-label small" for="emd_submitted">EMD Submitted (INR 117,600)</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch pt-2">
+                  <input class="form-check-input" type="checkbox" id="office_state" checked>
+                  <label class="form-check-label small" for="office_state">Local Office in Consignee State</label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn btn-primary w-100 fw-semibold">
+              <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+              Screen Bid Compliance
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column: Results & Findings -->
+      <div class="col-lg-7">
+        <div class="card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Screening Results</h2>
+            <div id="route-badge-container"></div>
+          </div>
+
+          <div id="status-alert" class="alert alert-secondary py-2 small d-none"></div>
+
+          <div id="results-placeholder" class="text-center py-5 text-muted">
+            <p>Submit a bid summary on the left or select the pre-filled Section 4.1 test case to trigger automated screening.</p>
+          </div>
+
+          <div id="results-container" class="d-none">
+            <div class="mb-3 p-3 bg-light rounded border">
+              <div class="row text-center">
+                <div class="col-4">
+                  <small class="text-muted d-block">Run ID</small>
+                  <span id="res-run-id" class="small fw-semibold text-truncate d-inline-block" style="max-width: 140px;"></span>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Status</small>
+                  <span id="res-status" class="badge bg-secondary"></span>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Escalation Reason</small>
+                  <span id="res-escalation" class="badge bg-warning text-dark">-</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="h6 fw-bold mb-2">Evaluated Mandatory Conditions</h3>
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-bordered align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 15%">Condition</th>
+                    <th style="width: 50%">Evaluation & Details</th>
+                    <th style="width: 15%">Status</th>
+                    <th style="width: 20%">Corpus Citations</th>
+                  </tr>
+                </thead>
+                <tbody id="findings-body"></tbody>
+              </table>
+            </div>
+
+            <div id="advisory-box" class="alert alert-info py-2 small mb-3"></div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted" id="res-metrics"></small>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-success" onclick="sendFeedback(true)">Confirm Recommendation</button>
+                <button class="btn btn-outline-danger" onclick="sendFeedback(false)">Flag Error</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
