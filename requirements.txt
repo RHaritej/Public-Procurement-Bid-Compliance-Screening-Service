@@ -1,0 +1,28 @@
+# Core Application Dependencies
+# Bid Compliance Screening Service (Tender GEM/2026/B/8034326)
+
+# Contracts & Schemas
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+
+# API Gateway & Networking
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+starlette>=0.36.0
+httpx>=0.27.0
+
+# Async Worker & Task Queue
+celery[redis]>=5.3.6
+redis>=5.0.3
+
+# Relational Persistence
+asyncpg>=0.29.0
+
+# Structured Logging & Metrics
+structlog>=24.1.0
+prometheus-client>=0.20.0
+
+# Distributed Tracing (OpenTelemetry)
+opentelemetry-api>=1.24.0
+opentelemetry-sdk>=1.24.0
+opentelemetry-exporter-otlp-proto-grpc>=1.24.0

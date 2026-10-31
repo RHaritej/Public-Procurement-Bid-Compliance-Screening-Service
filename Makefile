@@ -13,6 +13,7 @@ help:
 	@echo "  make demo-all  - Run all automated scenario demo scripts"
 
 setup:
+	pip install -r requirements-dev.txt
 	pip install -e contracts/
 	pip install -e packages/common/
 

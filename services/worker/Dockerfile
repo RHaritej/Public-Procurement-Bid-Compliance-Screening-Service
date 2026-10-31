@@ -4,13 +4,15 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
+COPY services/worker/requirements.txt /app/services/worker/requirements.txt
+RUN pip install --no-cache-dir -r /app/services/worker/requirements.txt
+
 COPY contracts/ /app/contracts/
 COPY packages/common/ /app/packages/common/
-COPY services/api/ /app/services/api/
-COPY services/worker/ /app/services/worker/
-
 RUN pip install --no-cache-dir -e /app/contracts/ -e /app/packages/common/
-RUN pip install --no-cache-dir celery redis asyncpg structlog prometheus-client opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc fastapi
+
+COPY services/worker/ /app/services/worker/
+COPY services/api/ /app/services/api/
 
 ENV PYTHONPATH=/app:/app/services/worker:/app/services/api:/app/contracts:/app/packages/common
 

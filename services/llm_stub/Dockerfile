@@ -4,9 +4,10 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY services/llm_stub/ /app/services/llm_stub/
+COPY services/llm_stub/requirements.txt /app/services/llm_stub/requirements.txt
+RUN pip install --no-cache-dir -r /app/services/llm_stub/requirements.txt
 
-RUN pip install --no-cache-dir fastapi uvicorn[standard] prometheus-client pydantic
+COPY services/llm_stub/ /app/services/llm_stub/
 
 EXPOSE 8003
 
