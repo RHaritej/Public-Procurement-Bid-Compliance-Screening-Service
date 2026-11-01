@@ -1,0 +1,366 @@
+{
+  "metadata": {
+    "generated_at": "2026-11-01T15:10:02Z",
+    "total_chunks": 16,
+    "pdf_sources_scanned": 6,
+    "ingestion_duration_seconds": 0.008,
+    "version": "1.0.0"
+  },
+  "chunks": [
+    {
+      "chunk_id": "CHK-197073D9FA6F",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::HDR.min_turnover",
+      "corpus": "TENDER",
+      "text": "Minimum Average Annual Turnover of the bidder (For 3 Years): 235 Lakh (s).",
+      "topics": [
+        "turnover",
+        "eligibility",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "LARGE",
+        "CONSORTIUM",
+        "FOREIGN"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "threshold_lakh": 235.0,
+        "condition_id": "MC-02",
+        "page": 1
+      }
+    },
+    {
+      "chunk_id": "CHK-8195512782F4",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::HDR.turnover_eligibility",
+      "corpus": "TENDER",
+      "text": "The minimum average annual financial turnover of the bidder during the last three years should be as specified in the bid document. Turnover is verified at technical evaluation stage.",
+      "topics": [
+        "turnover",
+        "evaluation"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "condition_id": "MC-02",
+        "page": 1
+      }
+    },
+    {
+      "chunk_id": "CHK-2326B7EFDBF3",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::HDR.exp_years",
+      "corpus": "TENDER",
+      "text": "Years of Past Experience Required: 3 Year (s) in similar Category Products / Services to any Central / State Govt Organization / PSU.",
+      "topics": [
+        "experience",
+        "eligibility",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "LARGE",
+        "CONSORTIUM",
+        "FOREIGN"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "required_years": 3.0,
+        "condition_id": "MC-03",
+        "page": 1
+      }
+    },
+    {
+      "chunk_id": "CHK-EA0B229DEDE6",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::HDR.docs_required",
+      "corpus": "TENDER",
+      "text": "Document required from seller: Experience Criteria, Bidder Turnover, Certificate (Requested in ATC), Compliance of BoQ specification and supporting document. In case seeking exemption from Experience / Turnover, supporting documents must be uploaded.",
+      "topics": [
+        "documents",
+        "compliance",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "condition_id": "MC-06",
+        "page": 2
+      }
+    },
+    {
+      "chunk_id": "CHK-18A8D6A83049",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::EMD.detail",
+      "corpus": "TENDER",
+      "text": "EMD Detail: Required: Yes. EMD Amount: INR 117600. Advisory Bank: State Bank of India. Bidder seeking EMD exemption must submit valid supporting document.",
+      "topics": [
+        "emd",
+        "exemption",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "emd_inr": 117600.0,
+        "condition_id": "MC-01",
+        "page": 2
+      }
+    },
+    {
+      "chunk_id": "CHK-F34B843A390A",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::MII.3",
+      "corpus": "TENDER",
+      "text": "If the bidder is a Micro or Small Enterprise (MSE) as per latest orders issued by Ministry of MSME, the bidder shall be relaxed from the eligibility criteria of 'Bidder Turnover' and 'Experience Criteria' subject to meeting of quality and technical specifications.",
+      "topics": [
+        "turnover",
+        "experience",
+        "relaxation",
+        "mse"
+      ],
+      "applies_to": [
+        "MSE"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "relaxation_type": "CONDITIONAL",
+        "modifies": [
+          "MC-02",
+          "MC-03"
+        ],
+        "page": 3
+      }
+    },
+    {
+      "chunk_id": "CHK-18D714F314BC",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::MII.4",
+      "corpus": "TENDER",
+      "text": "If the bidder is a DPIIT registered Startup, the bidder shall be relaxed from the eligibility criteria of 'Bidder Turnover' and 'Experience Criteria' subject to their meeting of quality and technical specifications. Supporting documents to prove eligibility must be uploaded.",
+      "topics": [
+        "turnover",
+        "experience",
+        "relaxation",
+        "startup"
+      ],
+      "applies_to": [
+        "STARTUP"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "relaxation_type": "CONDITIONAL",
+        "modifies": [
+          "MC-02",
+          "MC-03"
+        ],
+        "page": 3
+      }
+    },
+    {
+      "chunk_id": "CHK-7A46C7D85848",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::ATC.office_state",
+      "corpus": "TENDER",
+      "text": "Dedicated / toll Free Telephone No. for Service Support: Escalation Matrix for Service Support and Service provider office must be located in consignee state (Delhi / NCR).",
+      "topics": [
+        "office",
+        "support",
+        "location",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "condition_id": "MC-08",
+        "page": 8
+      }
+    },
+    {
+      "chunk_id": "CHK-F507B2740EBF",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::ATC.payroll",
+      "corpus": "TENDER",
+      "text": "The bidder should have at least 20 percent of total manpower on their payroll for at least one year. Necessary documents relating to such manpower will be uploaded by the bidder.",
+      "topics": [
+        "payroll",
+        "manpower",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "payroll_pct": 20.0,
+        "condition_id": "MC-05",
+        "page": 8
+      }
+    },
+    {
+      "chunk_id": "CHK-80E5D96F2506",
+      "doc_id": "GEM/2026/B/8034326",
+      "clause_id": "GEM_BID_8034326::ATC.similar_services",
+      "corpus": "TENDER",
+      "text": "Past Experience of Similar Services: Three similar completed services costing not less than the amount equal to 40% of estimated cost, or Two similar completed services costing not less than 50% of estimated cost, or One similar completed service costing not less than 80% of estimated cost to Central/State Govt or PSUs.",
+      "topics": [
+        "similar_services",
+        "past_experience",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "condition_id": "MC-04",
+        "thresholds": [
+          0.4,
+          0.5,
+          0.8
+        ],
+        "page": 4
+      }
+    },
+    {
+      "chunk_id": "CHK-0DEDD407DEDA",
+      "doc_id": "DOE_OM_2016_09_20",
+      "clause_id": "DOE_OM_2016_09_20::P2",
+      "corpus": "POLICY",
+      "text": "Department of Expenditure OM F.20/2/2014-PPD (Pt.) dated 20.09.2016: All Central Ministries / Departments may relax condition of prior turnover and prior experience in public procurement to all Startups (whether MSEs or not) subject to meeting quality and technical specifications.",
+      "topics": [
+        "relaxation",
+        "startup",
+        "turnover",
+        "experience"
+      ],
+      "applies_to": [
+        "STARTUP"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "Ministry of Finance, DoE",
+        "date": "2016-09-20",
+        "modifies": [
+          "MC-02",
+          "MC-03"
+        ]
+      }
+    },
+    {
+      "chunk_id": "CHK-D6EF3575316A",
+      "doc_id": "DOE_OM_2016_07_25",
+      "clause_id": "DOE_OM_2016_07_25::P1",
+      "corpus": "POLICY",
+      "text": "Department of Expenditure OM dated 25.07.2016: Relaxation of Norms for Startups and Micro & Small Enterprises in Public Procurement on Prior Experience and Prior Turnover criteria.",
+      "topics": [
+        "relaxation",
+        "startup",
+        "mse",
+        "turnover",
+        "experience"
+      ],
+      "applies_to": [
+        "STARTUP",
+        "MSE"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "Ministry of Finance, DoE",
+        "date": "2016-07-25"
+      }
+    },
+    {
+      "chunk_id": "CHK-89864ACBA564",
+      "doc_id": "DOE_OM_2017_07_27",
+      "clause_id": "DOE_OM_2017_07_27::P1",
+      "corpus": "POLICY",
+      "text": "Department of Expenditure OM dated 27.07.2017: Clarification on relaxation of prior experience and prior turnover for Startups and MSEs. Re-iterates that procuring entities shall exempt Startups from turnover requirements without requiring individual waivers.",
+      "topics": [
+        "relaxation",
+        "startup",
+        "mse",
+        "exemption"
+      ],
+      "applies_to": [
+        "STARTUP",
+        "MSE"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "Ministry of Finance, DoE",
+        "date": "2017-07-27"
+      }
+    },
+    {
+      "chunk_id": "CHK-927283767359",
+      "doc_id": "GFR_2017",
+      "clause_id": "GFR_2017::Rule170_i",
+      "corpus": "POLICY",
+      "text": "GFR 2017 Rule 170(i): Bid Security (EMD). Micro and Small Enterprises (MSEs) registered with District Industries Centres or Udyam, and Startups recognized by DPIIT are exempted from submission of Bid Security (Earnest Money Deposit).",
+      "topics": [
+        "emd",
+        "exemption",
+        "mse",
+        "startup"
+      ],
+      "applies_to": [
+        "MSE",
+        "STARTUP"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "GFR 2017",
+        "rule": "Rule 170(i)",
+        "condition_id": "MC-01"
+      }
+    },
+    {
+      "chunk_id": "CHK-0454D007D38E",
+      "doc_id": "GFR_2017",
+      "clause_id": "GFR_2017::Rule173_i",
+      "corpus": "POLICY",
+      "text": "GFR 2017 Rule 173(i): Transparency, competition, fairness and elimination of arbitrariness in procurement. Prescribed qualification criteria should be reasonable and not arbitrarily restrictive.",
+      "topics": [
+        "transparency",
+        "eligibility"
+      ],
+      "applies_to": [
+        "ALL"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "GFR 2017",
+        "rule": "Rule 173(i)"
+      }
+    },
+    {
+      "chunk_id": "CHK-E466EBEBB946",
+      "doc_id": "GFR_2017",
+      "clause_id": "GFR_2017::Rule144_xi",
+      "corpus": "POLICY",
+      "text": "GFR 2017 Rule 144(xi) - Public Procurement Order on restrictions under Rule 144(xi): Any bidder from a country which shares a land border with India will be eligible to bid in any procurement only if the bidder is registered with the Competent Authority (DPIIT).",
+      "topics": [
+        "land_border",
+        "national_security",
+        "mandatory_condition"
+      ],
+      "applies_to": [
+        "FOREIGN"
+      ],
+      "legal_status": "IN_FORCE",
+      "metadata": {
+        "authority": "DoE Order PPD",
+        "condition_id": "MC-07"
+      }
+    }
+  ]
+}
