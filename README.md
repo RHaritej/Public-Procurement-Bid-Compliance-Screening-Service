@@ -14,9 +14,9 @@ Target Tender: **`GEM/2026/B/8034326`** (National Informatics Centre, 5 Onsite P
 
 | Member | Focus Area | Owned Codepaths & Components |
 |---|---|---|
-| **Member A** *(Integration & Reliability Lead)* | **Platform & Reliability** | `contracts/`, `services/api/`, `services/worker/`, `services/llm_stub/`, `services/web/`, `packages/common/`, `infra/`, `loadtest/`, `scripts/`, `docker-compose.yml`, `Makefile`, `CODEOWNERS`, `docs/slo.md`, `docs/runbook.md`, `docs/architecture.md`, `docs/data_contract.md` |
-| **Member B** | **Knowledge, Retrieval & Safety** | `corpus/`, `ingestion/`, `services/retrieval/`, `packages/guardrails/`, `eval/scenarios/`, `docs/corpus_and_chunking.md`, `docs/guardrails.md` |
-| **Member C** | **Agents & LLMOps** | `packages/agents/`, `packages/llm_gateway/`, `prompts/`, `eval/run_eval.py`, `docs/agent_design.md`, `docs/prompts.md`, `docs/eval_report.md` |
+| **Hari Tej** *(Integration & Reliability Lead)* | **Platform & Reliability** | `contracts/`, `services/api/`, `services/worker/`, `services/llm_stub/`, `services/web/`, `packages/common/`, `infra/`, `loadtest/`, `scripts/`, `docker-compose.yml`, `Makefile`, `CODEOWNERS`, `docs/slo.md`, `docs/runbook.md`, `docs/architecture.md`, `docs/data_contract.md` |
+| **Sri Ram V** | **Knowledge, Retrieval & Safety** | `corpus/`, `ingestion/`, `services/retrieval/`, `packages/guardrails/`, `eval/scenarios/`, `docs/corpus_and_chunking.md`, `docs/guardrails.md` |
+| **Prithviraj** | **Agents & LLMOps** | `packages/agents/`, `packages/llm_gateway/`, `prompts/`, `eval/run_eval.py`, `docs/agent_design.md`, `docs/prompts.md`, `docs/eval_report.md` |
 
 ---
 
