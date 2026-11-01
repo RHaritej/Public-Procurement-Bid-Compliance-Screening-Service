@@ -1,0 +1,26 @@
+# Prompt Registry - Bid Compliance Screening Service
+# Owned by Member C (Requirement L2)
+
+prompts:
+  analyst:
+    active_version: "v2"
+    versions:
+      v1:
+        path: "analyst/v1.yaml"
+        created: "2026-10-25"
+        author: "Member C"
+        description: "Baseline screening analyst prompt using direct criteria lookup."
+      v2:
+        path: "analyst/v2.yaml"
+        created: "2026-10-30"
+        author: "Member C"
+        description: "Enhanced multi-hop analyst with explicit policy relaxation chaining and strict citation grounding."
+  verifier:
+    active_version: "v1"
+    versions:
+      v1:
+        path: "verifier/v1.yaml"
+        created: "2026-10-28"
+        author: "Member C"
+        description: "Strict citation verification against retrieved passage store."
+
