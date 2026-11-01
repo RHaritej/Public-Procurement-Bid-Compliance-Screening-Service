@@ -198,3 +198,41 @@ make test
 # Run Locust benchmark to verify p95 <= 60s at 20 concurrent submitters
 make loadtest
 ```
+
+
+---
+
+## 7. Knowledge, Ingestion, Retrieval & Safety Implementation (Sri Ram V)
+
+### 7.1 Ingestion Pipeline (`ingestion/`)
+- **Pipeline (`ingestion/pipeline.py`):** Idempotent CLI tool that reads, parses, chunks, and metadata-tags the procurement corpus into structured semantic clauses with deterministic SHA-256 chunk identifiers.
+- **Corpus Catalog (`corpus/corpus_index.json`):** Persisted catalog of 16 core tender and statutory policy clauses with freshness timestamps and page numbers.
+- **Data Models (`ingestion/schema.py`):** Pydantic `CorpusChunk` model capturing `chunk_id`, `clause_id`, `corpus` (`TENDER` vs `POLICY`), `topics`, `applies_to` bidder categories, `legal_status`, and `metadata`.
+- **Run Ingestion:**
+  ```bash
+  python -m ingestion.pipeline
+  ```
+
+### 7.2 Multi-Hop Retrieval Service (`services/retrieval/`)
+- **Retriever Engine (`services/retrieval/retriever.py`):**
+  - **S1 (Clause Lookup):** Direct lookup by exact canonical ID (`get_clause`).
+  - **S2 (Scoped Keyword Search):** Multi-criteria filtering by corpus scope (`TENDER`, `POLICY`, `ALL`), target category, and topics (`search`).
+  - **S3 (Modifying Provisions):** Cross-document discovery of statutory relaxations (e.g. DoE OM 2016-09-20, GFR Rule 170) modifying tender conditions (`find_modifying_provisions`).
+- **REST Service (`services/retrieval/main.py`):** Standalone FastAPI microservice on port `:8002` with endpoints:
+  - `GET /health` - Health check and indexed chunk counter.
+  - `POST /retrieve` - Multi-criteria search.
+  - `POST /clause` - Exact clause retrieval.
+  - `POST /modifying` - Modifying provisions and conflict detection.
+
+### 7.3 Guardrails & Safety Engine (`packages/guardrails/`)
+- **Prompt Injection Defense (`packages/guardrails/prompt_injection.py`):** Detects instruction overrides, system prompt resets, jailbreak phrases, and script/code injection across free-text fields.
+- **Output Boundary Guard (`packages/guardrails/output_filter.py`):** Enforces Section 2 boundary invariant (system never makes binding legal rejections or awards; advisory recommendations only) with automatic disclaimers and redactions.
+- **Toxicity Filter (`packages/guardrails/toxicity.py`):** Filters abusive, defamatory, and corrupt claims in bid text and agent outputs.
+- **Unified Engine (`packages/guardrails/engine.py`):** `validate_input(text)` and `validate_output(text)` returning structured `GuardrailResult` status.
+
+### 7.4 Evaluation Scenarios (`eval/scenarios/`)
+- **21 Fixed Scenarios (`eval/scenarios/scenarios.jsonl`):** Comprehensive benchmark covering Section 4.1 startup conflict, index ablation profiles, MSE relaxations, missing documentation, land-border checks, consortium edge cases, and adversarial guardrail injection attempts (S16 & S19).
+
+### 7.5 Technical Documentation
+- **[docs/corpus_and_chunking.md](file:///d:/Public-Procurement-Bid-Compliance-Screening-Service/Public-Procurement-Bid-Compliance-Screening-Service/docs/corpus_and_chunking.md):** Detailed analysis of two-corpus conflict, semantic clause chunking, metadata indexing, and multi-hop retrieval architecture.
+- **[docs/guardrails.md](file:///d:/Public-Procurement-Bid-Compliance-Screening-Service/Public-Procurement-Bid-Compliance-Screening-Service/docs/guardrails.md):** Defense-in-depth safety specifications, prompt injection patterns, and legal boundary enforcement.
