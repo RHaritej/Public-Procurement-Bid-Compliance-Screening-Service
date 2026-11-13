@@ -66,6 +66,7 @@ class CorpusScope(str, Enum):
     TENDER = "TENDER"
     POLICY = "POLICY"
     BOTH = "BOTH"
+    ALL = "BOTH"
 
 
 class MandatoryCondition(str, Enum):
@@ -80,3 +81,35 @@ class MandatoryCondition(str, Enum):
     MC_07 = "MC-07"  # Land-border country bidders registered with competent authority
     MC_08 = "MC-08"  # Service provider office in consignee's state
     MC_09 = "MC-09"  # Preference category claimed with supporting docs
+
+
+class CircuitState(str, Enum):
+    """Circuit breaker state for gateway resilience."""
+
+    CLOSED = "CLOSED"
+    OPEN = "OPEN"
+    HALF_OPEN = "HALF_OPEN"
+
+
+class EmdMode(str, Enum):
+    """EMD submission mode."""
+
+    PHYSICAL = "PHYSICAL"
+    ONLINE = "ONLINE"
+    EXEMPTED = "EXEMPTED"
+    NOT_SUBMITTED = "NOT_SUBMITTED"
+    EXEMPTION_CLAIMED = "EXEMPTION_CLAIMED"
+
+
+class DocumentType(str, Enum):
+    """Types of verification documents uploaded by bidders."""
+
+    EXPERIENCE_PROOF = "EXPERIENCE_PROOF"
+    TURNOVER_PROOF = "TURNOVER_PROOF"
+    DPIIT_CERTIFICATE = "DPIIT_CERTIFICATE"
+    UDYAM_CERTIFICATE = "UDYAM_CERTIFICATE"
+    PAYROLL_PROOF = "PAYROLL_PROOF"
+    LOCAL_OFFICE_PROOF = "LOCAL_OFFICE_PROOF"
+    LAND_BORDER_PROOF = "LAND_BORDER_PROOF"
+    EMD_PROOF = "EMD_PROOF"
+    TECHNICAL_SPECIFICATION = "TECHNICAL_SPECIFICATION"

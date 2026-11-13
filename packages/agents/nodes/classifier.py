@@ -53,17 +53,17 @@ def classify_bidder(state: AgentState) -> Dict[str, Any]:
 
     qualification_entities = {
         "bid_ref": bid.bid_ref,
-        "category": category.value,
+        "category": category.value if hasattr(category, "value") else str(category),
         "average_turnover_lakh": avg_turnover,
         "years_of_similar_service": years_exp,
         "payroll_share_pct": payroll_pct,
-        "emd_mode": bid.emd.mode.value,
+        "emd_mode": bid.emd.mode.value if hasattr(bid.emd.mode, "value") else str(bid.emd.mode),
         "emd_amount_inr": bid.emd.amount_inr,
         "emd_exemption_basis": bid.emd.exemption_basis,
         "has_local_office": bid.local_office_in_consignee_state,
         "land_border_registered": bidder.land_border_registered,
         "country_code": bidder.country_code,
-        "documents": [d.value for d in bid.documents_uploaded],
+        "documents": [d.value if hasattr(d, "value") else str(d) for d in bid.documents_uploaded],
         "unclear_reasons": unclear_reasons,
     }
 

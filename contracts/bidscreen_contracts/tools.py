@@ -5,11 +5,20 @@ These models define the contract between the agent and each tool implementation.
 
 from __future__ import annotations
 
-from typing import Optional
-
+from typing import Optional, Any
 from pydantic import BaseModel, Field
 
 from bidscreen_contracts.enums import CorpusScope, FindingStatus, MandatoryCondition
+
+
+class Passage(BaseModel):
+    """Corpus passage representation used by retrieval and agent tools."""
+
+    passage_id: str = Field(..., description="Unique passage or chunk identifier.")
+    doc_id: str = Field(..., description="Document source identifier.")
+    clause_id: str = Field(..., description="Specific clause identifier.")
+    text: str = Field(..., description="Full text of the passage.")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary passage metadata.")
 
 
 # ---------------------------------------------------------------------------

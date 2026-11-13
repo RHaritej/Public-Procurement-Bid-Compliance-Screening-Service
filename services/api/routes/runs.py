@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -19,13 +19,18 @@ from bidscreen_common.logging import get_logger
 from bidscreen_common.metrics import RUNS_TOTAL
 from bidscreen_contracts.enums import EscalationReason, Route, RunStatus
 try:
-    from bidscreen_api.quarantine import QuarantineService
-    from bidscreen_api.ratelimit import RateLimiter
-    from bidscreen_api.validation import validate_bid_summary
+    from services.api.quarantine import QuarantineService
+    from services.api.ratelimit import RateLimiter
+    from services.api.validation import validate_bid_summary
 except ImportError:
-    from quarantine import QuarantineService
-    from ratelimit import RateLimiter
-    from validation import validate_bid_summary
+    try:
+        from bidscreen_api.quarantine import QuarantineService
+        from bidscreen_api.ratelimit import RateLimiter
+        from bidscreen_api.validation import validate_bid_summary
+    except ImportError:
+        from quarantine import QuarantineService
+        from ratelimit import RateLimiter
+        from validation import validate_bid_summary
 
 router = APIRouter(tags=["Screenings"])
 logger = get_logger("bidscreen.api.routes", service="bidscreen-api")
@@ -64,6 +69,7 @@ class ScreeningSubmitResponse(BaseModel):
 async def submit_screening(
     request: Request,
     payload: dict[str, Any],
+    background_tasks: BackgroundTasks,
     x_client_id: Optional[str] = Header(default="anonymous", alias="X-Client-Id"),
     idempotency_key: Optional[str] = Header(default=None, alias="Idempotency-Key"),
 ):
@@ -126,18 +132,23 @@ async def submit_screening(
     if idempotency_key:
         IDEMPOTENCY_STORE[idempotency_key] = run_id
 
-    # 5. Dispatch task to Celery worker (or run inline if worker not active)
+    # 5. Dispatch task to Celery worker (or background task if worker not active)
     dispatched_to_celery = False
     try:
-        from bidscreen_worker.tasks import screen_bid_task
+        from services.worker.tasks import screen_bid_task
         screen_bid_task.delay(run_id, bid.model_dump(mode="json"), correlation_id)
         dispatched_to_celery = True
     except Exception as e:
         logger.info("celery_dispatch_skipped_fallback_inline", error=str(e), run_id=run_id)
 
-    # If Celery couldn't be reached (e.g. testing without redis broker), simulate worker queue
+    # If Celery couldn't be reached (e.g. testing without redis broker), process via background task
     if not dispatched_to_celery:
-        logger.info("run_queued_in_memory", run_id=run_id)
+        logger.info("run_queued_in_memory_scheduling_background_task", run_id=run_id)
+        try:
+            from services.worker.tasks import screen_bid_task
+            background_tasks.add_task(screen_bid_task, run_id, bid.model_dump(mode="json"), correlation_id)
+        except Exception as e2:
+            logger.error("background_task_failed_to_schedule", error=str(e2))
 
     RUNS_TOTAL.labels(status="QUEUED", route="NONE").inc()
 

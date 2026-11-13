@@ -317,8 +317,17 @@ def _run_walking_skeleton(bid: BidSummary, run_id: str, correlation_id: str) -> 
 
 
 @celery_app.task(name="screen_bid_task", bind=True)
-def screen_bid_task(self, run_id: str, bid_dict: dict[str, Any], correlation_id: str):
+def screen_bid_task(*args, **kwargs):
     """Celery background task for asynchronous screening."""
+    if len(args) == 4:
+        _self, run_id, bid_dict, correlation_id = args
+    elif len(args) == 3:
+        run_id, bid_dict, correlation_id = args
+    else:
+        run_id = kwargs.get("run_id")
+        bid_dict = kwargs.get("bid_dict")
+        correlation_id = kwargs.get("correlation_id", "")
+
     start_time = time.time()
     set_correlation_id(correlation_id)
 

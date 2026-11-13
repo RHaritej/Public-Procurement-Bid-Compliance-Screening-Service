@@ -2,7 +2,10 @@
 let currentRunId = null;
 let pollInterval = null;
 
-const API_BASE = window.location.origin;
+// Target API Gateway port 8000 when running on port 3000 static server
+const API_BASE = window.location.port === "8000"
+  ? window.location.origin
+  : `${window.location.protocol}//${window.location.hostname}:8000`;
 
 document.getElementById("screening-form").addEventListener("submit", async (e) => {
   e.preventDefault();

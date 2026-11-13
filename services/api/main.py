@@ -19,13 +19,18 @@ from bidscreen_common.correlation import CorrelationIDMiddleware
 from bidscreen_common.logging import configure_logging, get_logger
 from bidscreen_common.tracing import init_tracer
 try:
-    from bidscreen_api.quarantine import QuarantineService
-    from bidscreen_api.ratelimit import RateLimiter
-    from bidscreen_api.routes.runs import router as runs_router
+    from services.api.quarantine import QuarantineService
+    from services.api.ratelimit import RateLimiter
+    from services.api.routes.runs import router as runs_router
 except ImportError:
-    from quarantine import QuarantineService
-    from ratelimit import RateLimiter
-    from routes.runs import router as runs_router
+    try:
+        from bidscreen_api.quarantine import QuarantineService
+        from bidscreen_api.ratelimit import RateLimiter
+        from bidscreen_api.routes.runs import router as runs_router
+    except ImportError:
+        from quarantine import QuarantineService
+        from ratelimit import RateLimiter
+        from routes.runs import router as runs_router
 
 settings = get_settings()
 configure_logging(service_name="bidscreen-api", log_level=settings.log_level)
@@ -153,7 +158,14 @@ async def metrics():
     return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
 app.include_router(runs_router)
+
+web_dir = Path(__file__).resolve().parent.parent / "web"
+if web_dir.exists():
+    app.mount("/app", StaticFiles(directory=str(web_dir), html=True), name="static_app")
 
 if __name__ == "__main__":
     import uvicorn
