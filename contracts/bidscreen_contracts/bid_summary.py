@@ -2,6 +2,7 @@
 
 Conforms strictly to Section 6.1 Data Contract of Mini Project 06.
 Tender ID: GEM/2026/B/8034326
+Supports both Member A's canonical flat schema and Member C's agent-oriented schema.
 """
 
 from __future__ import annotations
@@ -122,6 +123,58 @@ class Manpower(BaseModel):
         le=100.0,
         description="Percentage of technical staff on payroll for at least 1 year (MC-05).",
     )
+    fy: Optional[str] = Field(default=None, description="Financial year.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _sync_values(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "value_lakh" in data and ("contract_value_lakh" not in data or data["contract_value_lakh"] is None):
+                data["contract_value_lakh"] = data["value_lakh"]
+            elif "contract_value_lakh" in data and ("value_lakh" not in data or data["value_lakh"] is None):
+                data["value_lakh"] = data["contract_value_lakh"]
+        return data
+
+
+class FinancialYearTurnover(BaseModel):
+    """Turnover for a single financial year."""
+
+    fy: str = Field(..., description="Financial year (e.g. '2023-24').")
+    turnover_lakh: float = Field(..., ge=0, description="Turnover in lakh INR.")
+
+
+class Financials(BaseModel):
+    """Financials container used by agent nodes."""
+
+    turnover_lakh_by_fy: list[FinancialYearTurnover] = Field(default_factory=list)
+    declared_average_turnover_lakh: Optional[float] = Field(default=None)
+
+    @property
+    def computed_average(self) -> float:
+        if not self.turnover_lakh_by_fy:
+            return self.declared_average_turnover_lakh or 0.0
+        return sum(f.turnover_lakh for f in self.turnover_lakh_by_fy) / max(len(self.turnover_lakh_by_fy), 1)
+
+
+class Experience(BaseModel):
+    """Experience metrics used by agent nodes."""
+
+    years_of_similar_service: float = Field(default=0.0, ge=0)
+    similar_services: list[SimilarService] = Field(default_factory=list)
+
+
+class EmdDetails(BaseModel):
+    """EMD details container used by agent nodes."""
+
+    mode: EmdMode = Field(default=EmdMode.PHYSICAL)
+    amount_inr: Optional[float] = Field(default=117600.0)
+    exemption_basis: Optional[str] = Field(default=None)
+
+
+class Manpower(BaseModel):
+    """Manpower container used by agent nodes."""
+
+    payroll_share_pct_one_year: float = Field(default=0.0, ge=0, le=100)
 
 
 class BidderInfo(BaseModel):
@@ -159,6 +212,16 @@ class BidderInfo(BaseModel):
     emd_exemption_claimed: Optional[bool] = Field(default=None)
     office_in_consignee_state: Optional[bool] = Field(default=None)
     documents_submitted: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _sync_startup_cert(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "dpiit_certificate_number" in data and ("startup_certificate_number" not in data or not data["startup_certificate_number"]):
+                data["startup_certificate_number"] = data["dpiit_certificate_number"]
+            elif "startup_certificate_number" in data and ("dpiit_certificate_number" not in data or not data["dpiit_certificate_number"]):
+                data["dpiit_certificate_number"] = data["startup_certificate_number"]
+        return data
 
     @field_validator("country_code")
     @classmethod

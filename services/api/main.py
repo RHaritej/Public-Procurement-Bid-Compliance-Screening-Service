@@ -155,6 +155,9 @@ async def metrics():
     return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
 app.include_router(runs_router)
 
 # Mount Web UI

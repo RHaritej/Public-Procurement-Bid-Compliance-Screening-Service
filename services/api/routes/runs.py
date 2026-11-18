@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import APIRouter, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -64,6 +64,7 @@ class ScreeningSubmitResponse(BaseModel):
 async def submit_screening(
     request: Request,
     payload: dict[str, Any],
+    background_tasks: BackgroundTasks,
     x_client_id: Optional[str] = Header(default="anonymous", alias="X-Client-Id"),
     idempotency_key: Optional[str] = Header(default=None, alias="Idempotency-Key"),
 ):
@@ -147,7 +148,7 @@ async def submit_screening(
         except Exception as e:
             logger.info("celery_dispatch_skipped_fallback_inline", error=str(e), run_id=run_id)
 
-    # If Celery couldn't be reached (e.g. testing without redis broker), simulate worker queue
+    # If Celery couldn't be reached (e.g. testing without redis broker), process via background task
     if not dispatched_to_celery:
         logger.info("executing_in_process_fallback", run_id=run_id)
         try:

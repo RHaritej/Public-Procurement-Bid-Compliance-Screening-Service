@@ -30,6 +30,24 @@ class Citation(BaseModel):
         default=None,
         description="Unique passage ID where this citation was found.",
     )
+    passage_id: Optional[str] = Field(
+        default=None,
+        description="Optional internal passage identifier.",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _handle_quote_alias(cls, data: object) -> object:
+        if isinstance(data, dict):
+            if "quote" in data and ("quoted_text" not in data or not data["quoted_text"]):
+                data["quoted_text"] = data["quote"]
+            elif "quoted_text" in data and ("quote" not in data or not data["quote"]):
+                data["quote"] = data["quoted_text"]
+        return data
+
+    @property
+    def quote(self) -> str:
+        return self.quoted_text
 
     @model_validator(mode="after")
     def _sync_quotes(self) -> "Citation":

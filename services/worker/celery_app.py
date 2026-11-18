@@ -5,10 +5,27 @@ Service: worker (Member A ownership)
 
 from __future__ import annotations
 
-from celery import Celery
 from bidscreen_common.config import get_settings
 
 settings = get_settings()
+
+try:
+    from celery import Celery
+    _HAS_CELERY = True
+except ImportError:
+    _HAS_CELERY = False
+
+    class Celery:  # type: ignore[no-redef]
+        def __init__(self, *args, **kwargs):
+            self.conf = {}
+
+        def task(self, *args, **kwargs):
+            def decorator(fn):
+                def delay(*a, **kw):
+                    raise RuntimeError("Celery is not installed or broker is unavailable")
+                fn.delay = delay
+                return fn
+            return decorator
 
 celery_app = Celery(
     "bidscreen_worker",

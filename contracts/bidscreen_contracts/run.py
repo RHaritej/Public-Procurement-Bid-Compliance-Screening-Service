@@ -35,6 +35,29 @@ class TokenCostMetrics(BaseModel):
     steps: Dict[str, StepMetrics] = Field(default_factory=dict)
 
 
+class StepMetrics(BaseModel):
+    """Metrics recorded for a single LLM invocation step."""
+
+    step: str = Field(..., description="Name of the step (e.g. 'analyst', 'verifier').")
+    prompt_tokens: int = Field(default=0, ge=0)
+    completion_tokens: int = Field(default=0, ge=0)
+    total_tokens: int = Field(default=0, ge=0)
+    cost_usd: float = Field(default=0.0, ge=0.0)
+    latency_ms: float = Field(default=0.0, ge=0.0)
+    model: str = Field(default="", description="LLM model identifier used.")
+    prompt_version: str = Field(default="", description="Prompt template version used.")
+
+
+class TokenCostMetrics(BaseModel):
+    """Aggregated token and cost metrics for a screening run."""
+
+    total_prompt_tokens: int = Field(default=0, ge=0)
+    total_completion_tokens: int = Field(default=0, ge=0)
+    total_tokens: int = Field(default=0, ge=0)
+    total_cost_usd: float = Field(default=0.0, ge=0.0)
+    by_step: dict[str, StepMetrics] = Field(default_factory=dict)
+
+
 class RunSubmission(BaseModel):
     """Payload accepted by POST /runs."""
 
