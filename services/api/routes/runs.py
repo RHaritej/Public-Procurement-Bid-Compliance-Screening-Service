@@ -215,6 +215,7 @@ async def get_screening(run_id: str, request: Request):
 
     if str(run.get("status")) in ("COMPLETED", RunStatus.COMPLETED.value) and run.get("result") is not None:
         response.update(run["result"])
+        response["screening_result"] = run["result"]
     elif str(run.get("status")) in ("FAILED", RunStatus.FAILED.value):
         response["error_message"] = run.get("error_message")
 

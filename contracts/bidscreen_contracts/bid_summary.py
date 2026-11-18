@@ -217,10 +217,11 @@ class BidderInfo(BaseModel):
     @classmethod
     def _sync_startup_cert(cls, data: Any) -> Any:
         if isinstance(data, dict):
-            if "dpiit_certificate_number" in data and ("startup_certificate_number" not in data or not data["startup_certificate_number"]):
-                data["startup_certificate_number"] = data["dpiit_certificate_number"]
-            elif "startup_certificate_number" in data and ("dpiit_certificate_number" not in data or not data["dpiit_certificate_number"]):
-                data["dpiit_certificate_number"] = data["startup_certificate_number"]
+            cert = data.get("dpiit_certificate_number") or data.get("startup_certificate_number") or data.get("dpiit_number")
+            if cert:
+                data["dpiit_certificate_number"] = cert
+                data["startup_certificate_number"] = cert
+                data["dpiit_number"] = cert
         return data
 
     @field_validator("country_code")
