@@ -66,6 +66,7 @@ class CorpusScope(str, Enum):
     TENDER = "TENDER"
     POLICY = "POLICY"
     BOTH = "BOTH"
+    ALL = "ALL"
 
 
 class MandatoryCondition(str, Enum):
@@ -80,3 +81,51 @@ class MandatoryCondition(str, Enum):
     MC_07 = "MC-07"  # Land-border country bidders registered with competent authority
     MC_08 = "MC-08"  # Service provider office in consignee's state
     MC_09 = "MC-09"  # Preference category claimed with supporting docs
+
+
+class CircuitState(str, Enum):
+    """State of the LLM Gateway circuit breaker."""
+
+    CLOSED = "CLOSED"
+    HALF_OPEN = "HALF_OPEN"
+    OPEN = "OPEN"
+
+
+class EmdMode(str, Enum):
+    """Mode of Earnest Money Deposit submission."""
+
+    PHYSICAL = "PHYSICAL"
+    SURETY_BOND = "SURETY_BOND"
+    EXEMPTION_CLAIMED = "EXEMPTION_CLAIMED"
+    NOT_SUBMITTED = "NOT_SUBMITTED"
+
+
+class DocumentType(str, Enum):
+    """Recognized mandatory document identifiers."""
+
+    EXPERIENCE_PROOF = "EXPERIENCE_PROOF"
+    TURNOVER_PROOF = "TURNOVER_PROOF"
+    EMD_EXEMPTION_PROOF = "EMD_EXEMPTION_PROOF"
+    DPIIT_CERTIFICATE = "DPIIT_CERTIFICATE"
+    UDYAM_CERTIFICATE = "UDYAM_CERTIFICATE"
+    TOLL_FREE_NUMBER = "TOLL_FREE_NUMBER"
+    ESCALATION_MATRIX = "ESCALATION_MATRIX"
+    PAYROLL_PROOF = "PAYROLL_PROOF"
+
+
+class ClientType(str, Enum):
+    """Types of clients for prior similar contracts."""
+
+    CENTRAL_GOVT = "CENTRAL_GOVT"
+    STATE_GOVT = "STATE_GOVT"
+    PSU = "PSU"
+    OTHER = "OTHER"
+    CENTRAL = "CENTRAL"
+    STATE = "STATE"
+
+
+class MseClass(str, Enum):
+    """MSME classification."""
+
+    MICRO = "MICRO"
+    SMALL = "SMALL"

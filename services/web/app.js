@@ -2,7 +2,9 @@
 let currentRunId = null;
 let pollInterval = null;
 
-const API_BASE = window.location.origin;
+const API_BASE = (window.location.port === "3000")
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : window.location.origin;
 
 document.getElementById("screening-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -155,16 +157,19 @@ function renderResults(data) {
       citationsHtml = f.citations.map(c => `
         <div class="citation-box">
           <strong>${c.clause_id}</strong><br>
-          <em>"${c.quoted_text}"</em>
+          <em>"${c.quote || c.quoted_text || ""}"</em>
         </div>
       `).join("");
     }
 
+    const condName = f.condition_name || f.summary || f.condition_id;
+    const advNote = f.advisory_note || (f.condition_name && f.summary && f.condition_name !== f.summary ? f.summary : "");
+
     tr.innerHTML = `
       <td><strong>${f.condition_id}</strong></td>
       <td>
-        <div class="fw-semibold">${f.condition_name}</div>
-        <div class="small text-muted">${f.advisory_note || ""}</div>
+        <div class="fw-semibold">${condName}</div>
+        <div class="small text-muted">${advNote}</div>
       </td>
       <td><span class="status-badge status-${f.status}">${f.status}</span></td>
       <td>${citationsHtml}</td>
@@ -188,17 +193,34 @@ function renderResults(data) {
 
 async function sendFeedback(agree) {
   if (!currentRunId) return;
+  const btnConfirm = document.getElementById("btn-confirm-feedback");
+  const btnFlag = document.getElementById("btn-flag-feedback");
+
   try {
     const res = await fetch(`${API_BASE}/v1/screenings/${currentRunId}/feedback`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ satisfactory: agree, reason: agree ? "Verified accurate" : "Flagged by operator" })
+      body: JSON.stringify({
+        satisfactory: agree,
+        reason: agree ? "Verified accurate by operator" : "Flagged error by operator"
+      })
     });
     if (res.ok) {
-      showAlert("Feedback submitted successfully. Recorded for quality evaluation.", "info");
+      if (agree) {
+        btnConfirm.className = "btn btn-success active";
+        btnFlag.className = "btn btn-outline-danger";
+        showAlert("✓ <strong>Recommendation Confirmed!</strong> Operator feedback successfully persisted and aggregated.", "success");
+      } else {
+        btnConfirm.className = "btn btn-outline-success";
+        btnFlag.className = "btn btn-danger active";
+        showAlert("⚠ <strong>Error Flagged!</strong> Discrepancy logged for human review and retraining.", "warning");
+      }
+    } else {
+      showAlert(`Feedback submission failed: HTTP ${res.status}`, "danger");
     }
   } catch (e) {
     console.error("Feedback error", e);
+    showAlert(`Feedback submission error: ${e.message}`, "danger");
   }
 }
 

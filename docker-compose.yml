@@ -85,24 +85,17 @@ services:
     restart: unless-stopped
 
   retrieval:
-    image: python:3.11-slim
+    build:
+      context: .
+      dockerfile: services/retrieval/Dockerfile
     ports:
       - "8002:8002"
-    command: >
-      python -c "
-      import http.server, socketserver
-      class H(http.server.SimpleHTTPRequestHandler):
-          def do_GET(self):
-              self.send_response(200)
-              self.end_headers()
-              self.wfile.write(b'{\"status\":\"healthy\",\"service\":\"retrieval-placeholder\"}')
-      socketserver.TCPServer(('', 8002), H).serve_forever()
-      "
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 10s
       timeout: 3s
       retries: 3
+    restart: unless-stopped
 
   # ---------------------------------------------------------------------------
   # Infrastructure & Persistence

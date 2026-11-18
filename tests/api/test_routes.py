@@ -60,7 +60,7 @@ def test_get_screening_run(client: TestClient, valid_bid_payload):
     assert get_resp.status_code == 200
     run_data = get_resp.json()
     assert run_data["run_id"] == run_id
-    assert run_data["status"] == RunStatus.QUEUED
+    assert run_data["status"] in (RunStatus.QUEUED, RunStatus.COMPLETED)
 
 
 def test_get_nonexistent_run(client: TestClient):

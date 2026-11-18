@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-11-01T15:10:02Z",
+    "generated_at": "2026-11-18T13:22:46Z",
     "total_chunks": 16,
     "pdf_sources_scanned": 6,
-    "ingestion_duration_seconds": 0.008,
+    "ingestion_duration_seconds": 0.001,
     "version": "1.0.0"
   },
   "chunks": [

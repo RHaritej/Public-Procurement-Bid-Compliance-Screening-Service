@@ -5,7 +5,12 @@ Reference: Section 7 (Requirements L3, L5, L6).
 import os
 import json
 import time
+import sys
 from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 from typing import Dict, Any, List
 
 from bidscreen_contracts.bid_summary import BidSummary

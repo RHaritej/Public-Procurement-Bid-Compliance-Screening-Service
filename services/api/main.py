@@ -11,7 +11,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from bidscreen_common.config import get_settings
@@ -19,13 +21,13 @@ from bidscreen_common.correlation import CorrelationIDMiddleware
 from bidscreen_common.logging import configure_logging, get_logger
 from bidscreen_common.tracing import init_tracer
 try:
+    from services.api.quarantine import QuarantineService
+    from services.api.ratelimit import RateLimiter
+    from services.api.routes.runs import router as runs_router
+except ImportError:
     from bidscreen_api.quarantine import QuarantineService
     from bidscreen_api.ratelimit import RateLimiter
     from bidscreen_api.routes.runs import router as runs_router
-except ImportError:
-    from quarantine import QuarantineService
-    from ratelimit import RateLimiter
-    from routes.runs import router as runs_router
 
 settings = get_settings()
 configure_logging(service_name="bidscreen-api", log_level=settings.log_level)
@@ -154,6 +156,19 @@ async def metrics():
 
 
 app.include_router(runs_router)
+
+# Mount Web UI
+web_dir = Path(__file__).resolve().parent.parent / "web"
+if web_dir.exists():
+    app.mount("/ui", StaticFiles(directory=str(web_dir), html=True), name="web_ui")
+
+    @app.get("/app.js", include_in_schema=False)
+    async def serve_root_app_js():
+        return FileResponse(str(web_dir / "app.js"))
+
+    @app.get("/", include_in_schema=False)
+    async def root_redirect():
+        return RedirectResponse(url="/ui/")
 
 if __name__ == "__main__":
     import uvicorn

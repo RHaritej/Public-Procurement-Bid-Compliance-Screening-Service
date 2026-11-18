@@ -324,7 +324,31 @@ def screen_bid_task(self, run_id: str, bid_dict: dict[str, Any], correlation_id:
 
     logger.info("worker_started_task", run_id=run_id, correlation_id=correlation_id)
 
-    # Update in RUNS_STORE
+    # Sync state to Redis so API container can read it across microservice boundaries
+    def _sync_to_redis(status_val: str, result_dict: Optional[dict[str, Any]] = None, err_msg: Optional[str] = None):
+        try:
+            import json
+            import redis
+            r = redis.from_url(settings.redis_url, decode_responses=True)
+            existing_raw = r.get(f"bidscreen:run:{run_id}")
+            entry = json.loads(existing_raw) if existing_raw else {
+                "run_id": run_id,
+                "correlation_id": correlation_id,
+                "bid_ref": bid_dict.get("bid_ref", "UNKNOWN"),
+                "tender_id": bid_dict.get("tender_id", settings.tender_id),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+            entry["status"] = status_val
+            entry["updated_at"] = datetime.now(timezone.utc).isoformat()
+            if result_dict is not None:
+                entry["result"] = result_dict
+            if err_msg is not None:
+                entry["error_message"] = err_msg
+            r.set(f"bidscreen:run:{run_id}", json.dumps(entry), ex=86400)
+        except Exception as r_err:
+            logger.warning("sync_to_redis_failed", error=str(r_err), run_id=run_id)
+
+    _sync_to_redis(RunStatus.RUNNING.value)
     if run_id in RUNS_STORE:
         RUNS_STORE[run_id]["status"] = RunStatus.RUNNING
         RUNS_STORE[run_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -332,12 +356,12 @@ def screen_bid_task(self, run_id: str, bid_dict: dict[str, Any], correlation_id:
     try:
         bid = BidSummary.model_validate(bid_dict)
 
-        # Call Member C's agent graph if available, else walking skeleton
+        # Call Member C's multi-agent graph (with fallback to walking skeleton if unavailable)
         try:
-            from bidscreen_agents import run_screening
-            result = run_screening(run_id=run_id, bid=bid, correlation_id=correlation_id)
-        except (ImportError, AttributeError):
-            logger.info("using_walking_skeleton_screening", run_id=run_id)
+            from packages.agents.graph import run_screening
+            result = run_screening(run_id=run_id, bid=bid, correlation_id=correlation_id, prompt_version="analyst@v2")
+        except Exception as agent_err:
+            logger.info("using_walking_skeleton_screening", run_id=run_id, error=str(agent_err))
             result = _run_walking_skeleton(bid, run_id, correlation_id)
 
         duration = time.time() - start_time
@@ -347,10 +371,13 @@ def screen_bid_task(self, run_id: str, bid_dict: dict[str, Any], correlation_id:
         if result.llm_cost_usd:
             LLM_COST_USD_TOTAL.labels(step="screening").inc(result.llm_cost_usd)
 
-        # Update RUNS_STORE
+        result_json = result.model_dump(mode="json")
+        _sync_to_redis(RunStatus.COMPLETED.value, result_dict=result_json)
+
+        # Update in-memory RUNS_STORE
         if run_id in RUNS_STORE:
             RUNS_STORE[run_id]["status"] = RunStatus.COMPLETED
-            RUNS_STORE[run_id]["result"] = result.model_dump(mode="json")
+            RUNS_STORE[run_id]["result"] = result_json
             RUNS_STORE[run_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
 
         logger.info(
@@ -359,11 +386,12 @@ def screen_bid_task(self, run_id: str, bid_dict: dict[str, Any], correlation_id:
             recommended_route=result.recommended_route.value,
             duration_s=duration,
         )
-        return result.model_dump(mode="json")
+        return result_json
 
     except Exception as exc:
         duration = time.time() - start_time
         RUNS_TOTAL.labels(status="FAILED", route="NONE").inc()
+        _sync_to_redis(RunStatus.FAILED.value, err_msg=str(exc))
         if run_id in RUNS_STORE:
             RUNS_STORE[run_id]["status"] = RunStatus.FAILED
             RUNS_STORE[run_id]["error_message"] = str(exc)

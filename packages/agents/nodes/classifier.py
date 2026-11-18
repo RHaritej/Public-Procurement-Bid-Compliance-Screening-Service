@@ -63,7 +63,7 @@ def classify_bidder(state: AgentState) -> Dict[str, Any]:
         "has_local_office": bid.local_office_in_consignee_state,
         "land_border_registered": bidder.land_border_registered,
         "country_code": bidder.country_code,
-        "documents": [d.value for d in bid.documents_uploaded],
+        "documents": [d.value if hasattr(d, "value") else str(d) for d in bid.documents_uploaded],
         "unclear_reasons": unclear_reasons,
     }
 

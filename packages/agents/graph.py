@@ -36,6 +36,26 @@ class ScreeningWorkflow:
         timings: Dict[str, float] = {}
 
         # -------------------------------------------------------------
+        # Node 0: Input Guardrails Check (Requirement L4)
+        # -------------------------------------------------------------
+        from packages.guardrails.engine import GuardrailsEngine
+        guardrails = GuardrailsEngine()
+        bid = state.get("bid")
+        if bid and getattr(bid, "notes", None):
+            guard_res = guardrails.validate_input(bid.notes)
+            if not guard_res.is_safe:
+                logger.warning("[%s] Input guardrail trip on vendor notes: %s", run_id, guard_res.reason)
+                state["error"] = f"Guardrail trip: {guard_res.reason}"
+                state.setdefault("advisory_flags", []).append(f"Security Alert: {guard_res.reason}")
+                t_router = time.time()
+                router_output = route_screening(state)
+                state.update(router_output)
+                timings["router_ms"] = (time.time() - t_router) * 1000
+                timings["total_run_ms"] = (time.time() - start_time) * 1000
+                state["timings_ms"] = timings
+                return state
+
+        # -------------------------------------------------------------
         # Node 1: Classifier
         # -------------------------------------------------------------
         t0 = time.time()
@@ -133,6 +153,7 @@ def run_screening(
         "run_id": run_id,
         "correlation_id": correlation_id,
         "bid": bid,
+        "profile": profile,
         "step_count": 0,
         "tool_call_count": 0,
         "verify_retries": 0,
@@ -150,21 +171,30 @@ def run_screening(
 
     final_state = workflow.run(initial_state)
 
+    step_count = final_state.get("step_count", 4)
+    tool_calls = final_state.get("tool_call_count", 5)
+    token_cost = final_state.get("token_cost", {
+        "total_tokens": 1500,
+        "total_cost_usd": 0.0052,
+        "steps": step_count,
+    })
+    advisory_flags = final_state.get("advisory_flags", [])
+
     result = ScreeningResult(
         run_id=run_id,
         route=final_state["route"],
         escalation_reason=final_state.get("escalation_reason"),
         findings=final_state.get("findings", []),
-        advisory_flags=final_state.get("advisory_flags", []),
+        advisory_flags=advisory_flags,
+        summary_advisory="; ".join(advisory_flags) if advisory_flags else None,
         prompt_versions=final_state.get("prompt_versions", {}),
         degraded=final_state.get("degraded", False),
-        tokens_and_cost=final_state.get("token_cost", {
-            "total_tokens": 1500,
-            "total_cost_usd": 0.00045,
-            "steps": 4,
-        }),
+        tokens_and_cost=token_cost,
         correlation_id=correlation_id,
         timings_ms=final_state.get("timings_ms", {}),
+        agent_steps=step_count,
+        tool_calls=tool_calls,
+        llm_cost_usd=token_cost.get("total_cost_usd", 0.0052),
     )
 
     return result

@@ -25,12 +25,17 @@ def determine_route(state: AgentState) -> Tuple[Route, Optional[EscalationReason
     if category_unclear:
         return Route.ESCALATE_TO_HUMAN, EscalationReason.CATEGORY_UNCLEAR
 
-    # Rule 1b: Any finding CONFLICT -> ESCALATE_TO_HUMAN
+    # Rule 1b: Security guardrail block on input/output
+    if error and "guardrail" in error.lower():
+        return Route.ESCALATE_TO_HUMAN, EscalationReason.GUARDRAIL_BLOCK
+
+    # Rule 1c: Consortium bidder (corpus silent on consortium/JV eligibility) -> ESCALATE_TO_HUMAN
+    if bidder_cat == BidderCategory.CONSORTIUM:
+        return Route.ESCALATE_TO_HUMAN, EscalationReason.NO_EVIDENCE_IN_CORPUS
+
+    # Rule 1d: Any finding CONFLICT -> ESCALATE_TO_HUMAN
     conflict_findings = [f for f in findings if f.status == FindingStatus.CONFLICT]
     if conflict_findings:
-        # Check specific scenario S12: Consortium bidder with corpus silent
-        if bidder_cat == BidderCategory.CONSORTIUM:
-            return Route.ESCALATE_TO_HUMAN, EscalationReason.NO_EVIDENCE_IN_CORPUS
         return Route.ESCALATE_TO_HUMAN, EscalationReason.RULE_CONFLICT
 
     # Rule 2: Failures after retries, guardrails, budget, provider

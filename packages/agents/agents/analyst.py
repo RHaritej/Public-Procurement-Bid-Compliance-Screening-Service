@@ -33,6 +33,9 @@ class AnalystAgent:
 
     def _truncate_quote(self, text: str, max_words: int = 38) -> str:
         words = text.strip().split()
+        if self.prompt_version == "analyst@v1":
+            # Baseline prompt v1 has no word-length truncation constraint (often > 40 words)
+            return text.strip()
         if len(words) <= max_words:
             return text.strip()
         return " ".join(words[:max_words]) + "..."
@@ -49,6 +52,8 @@ class AnalystAgent:
         """Performs multi-condition screening analysis."""
         bid = state["bid"]
         category = bid.bidder.declared_category
+        profile = state.get("profile", "full")
+        is_v1 = (self.prompt_version == "analyst@v1")
         retrieved: Dict[str, Passage] = dict(state.get("retrieved_passages", {}))
         tool_calls = state.get("tool_call_count", 0)
         advisory_flags: List[str] = list(state.get("advisory_flags", []))
@@ -61,8 +66,8 @@ class AnalystAgent:
             retrieved[p.clause_id] = p
             retrieved[p.passage_id] = p
 
-        # Step 2: Strategy S2 & S3 - If bidder is STARTUP or MSE, retrieve modifying policy orders
-        if category in (BidderCategory.STARTUP, BidderCategory.MSE):
+        # Step 2: Strategy S2 & S3 - If bidder is STARTUP or MSE, retrieve modifying policy orders (v2 multi-hop)
+        if not is_v1 and category in (BidderCategory.STARTUP, BidderCategory.MSE):
             # S2: query rewritten
             s2_results = search_corpus(
                 f"relaxation prior turnover experience {category.value}",
@@ -98,7 +103,18 @@ class AnalystAgent:
                 citations=citations,
             ))
         elif bid.emd.mode == EmdMode.EXEMPTION_CLAIMED:
-            if bid.emd.exemption_basis == "STARTUP":
+            if is_v1:
+                # Baseline v1 treats startup exemption as unverified rather than recognizing Conflict C7
+                p_emd_a = get_clause("GEM_BID_8034326::EMD.a")
+                tool_calls += 1
+                citations = [self._create_citation(p_emd_a)] if p_emd_a else []
+                findings.append(Finding(
+                    condition_id="MC-01",
+                    status=FindingStatus.NOT_VERIFIABLE if bid.emd.exemption_basis == "STARTUP" else FindingStatus.MET,
+                    summary="Startup exemption claimed but tender covers MSEs only; evidence unverified." if bid.emd.exemption_basis == "STARTUP" else "MSE EMD exemption claimed.",
+                    citations=citations,
+                ))
+            elif bid.emd.exemption_basis == "STARTUP":
                 # Conflict C7: Tender exempts MSE only, DIPP letter requests startups
                 p_emd_a = get_clause("GEM_BID_8034326::EMD.a")
                 p_dipp = get_clause("DIPP_DO_2017_06_22::P4")
@@ -169,17 +185,27 @@ class AnalystAgent:
                 citations=citations,
             ))
         else:
-            if category in (BidderCategory.STARTUP, BidderCategory.MSE):
+            if is_v1:
+                # Baseline single-pass: does not perform second-hop multi-hop retrieval into statutory relaxations
+                citations = [self._create_citation(p_hdr_turnover)] if p_hdr_turnover else []
+                findings.append(Finding(
+                    condition_id="MC-02",
+                    status=FindingStatus.UNMET,
+                    summary=f"Average turnover INR {avg_turnover:.2f} lakh below 235 lakh threshold.",
+                    citations=citations,
+                ))
+            elif category in (BidderCategory.STARTUP, BidderCategory.MSE):
                 # Rule: STARTUP or MSE below threshold gets CONFLICT
                 citations = []
                 if p_hdr_turnover:
                     citations.append(self._create_citation(p_hdr_turnover))
-                # Add tender relaxation clause MII.4 or MII.2
-                p_mii = get_clause("GEM_BID_8034326::MII.4" if category == BidderCategory.STARTUP else "GEM_BID_8034326::MII.2")
-                tool_calls += 1
-                if p_mii:
-                    retrieved[p_mii.clause_id] = p_mii
-                    citations.append(self._create_citation(p_mii))
+                # Add tender relaxation clause MII.4 or MII.2 unless profile is tender_core (ablation)
+                if profile != "tender_core":
+                    p_mii = get_clause("GEM_BID_8034326::MII.4" if category == BidderCategory.STARTUP else "GEM_BID_8034326::MII.2")
+                    tool_calls += 1
+                    if p_mii:
+                        retrieved[p_mii.clause_id] = p_mii
+                        citations.append(self._create_citation(p_mii))
                 # Add policy OM
                 p_policy = get_clause("DOE_OM_2016_09_20::P2")
                 tool_calls += 1
@@ -224,15 +250,24 @@ class AnalystAgent:
                 citations=citations,
             ))
         else:
-            if category in (BidderCategory.STARTUP, BidderCategory.MSE):
+            if is_v1:
+                citations = [self._create_citation(p_hdr_exp)] if p_hdr_exp else []
+                findings.append(Finding(
+                    condition_id="MC-03",
+                    status=FindingStatus.UNMET,
+                    summary=f"Past experience of {years_exp} years is below required 3 years.",
+                    citations=citations,
+                ))
+            elif category in (BidderCategory.STARTUP, BidderCategory.MSE):
                 citations = []
                 if p_hdr_exp:
                     citations.append(self._create_citation(p_hdr_exp))
-                p_mii = get_clause("GEM_BID_8034326::MII.3" if category == BidderCategory.STARTUP else "GEM_BID_8034326::MII.1")
-                tool_calls += 1
-                if p_mii:
-                    retrieved[p_mii.clause_id] = p_mii
-                    citations.append(self._create_citation(p_mii))
+                if profile != "tender_core":
+                    p_mii = get_clause("GEM_BID_8034326::MII.3" if category == BidderCategory.STARTUP else "GEM_BID_8034326::MII.1")
+                    tool_calls += 1
+                    if p_mii:
+                        retrieved[p_mii.clause_id] = p_mii
+                        citations.append(self._create_citation(p_mii))
                 p_policy = get_clause("DOE_OM_2016_09_20::P2")
                 tool_calls += 1
                 if p_policy:
@@ -426,8 +461,8 @@ class AnalystAgent:
                 citations=[],
             ))
 
-        # Advisory Flags: QCBS cut-offs check
-        if any(f.status == FindingStatus.CONFLICT for f in findings):
+        # Advisory Flags: QCBS cut-offs check (v2 enhanced feature)
+        if not is_v1 and any(f.status == FindingStatus.CONFLICT for f in findings):
             p_qcbs = get_clause("TENDER_QCBS::NOTE3")
             tool_calls += 1
             if p_qcbs:

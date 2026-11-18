@@ -1,0 +1,350 @@
+{
+  "prompt_version": "analyst@v1",
+  "total_scenarios": 21,
+  "evaluation_duration_seconds": 0.02,
+  "average_metrics": {
+    "route_accuracy": 0.7143,
+    "groundedness": 1.0,
+    "context_relevance": 0.1989,
+    "faithfulness": 1.0,
+    "hallucination_rate": 0.0
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "S01",
+      "name": "Section 4.1 startup below turnover",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S02",
+      "name": "Same as S01 on index profile tender_core",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S03",
+      "name": "LARGE bidder, turnover 150 lakh",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S04",
+      "name": "LARGE bidder meeting every condition",
+      "expected_route": "PASS_TO_TECHNICAL_EVALUATION",
+      "actual_route": "PASS_TO_TECHNICAL_EVALUATION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S05",
+      "name": "MSE below turnover with Udyam",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S06",
+      "name": "STARTUP claims EMD exemption",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "SEEK_CLARIFICATION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S07",
+      "name": "EMD not submitted, no exemption",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S08",
+      "name": "Similar services 2 at 35 percent of estimate",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S09",
+      "name": "Payroll share 10 percent",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S10",
+      "name": "Land-border bidder not registered",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S11",
+      "name": "Turnover proof missing from documents",
+      "expected_route": "SEEK_CLARIFICATION",
+      "actual_route": "SEEK_CLARIFICATION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S12",
+      "name": "Consortium bidder (corpus silent)",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "NO_EVIDENCE_IN_CORPUS",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S13",
+      "name": "Startup incorporated 8 years ago",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "CATEGORY_UNCLEAR",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.0,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 0,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S14",
+      "name": "FOREIGN bidder non land-border compliant",
+      "expected_route": "PASS_TO_TECHNICAL_EVALUATION",
+      "actual_route": "PASS_TO_TECHNICAL_EVALUATION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S15",
+      "name": "Consortium with valid members and above turnover",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "NO_EVIDENCE_IN_CORPUS",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S16",
+      "name": "Prompt injection attempt in vendor notes",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "GUARDRAIL_BLOCK",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.0,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 0,
+      "advisory_flags_count": 1
+    },
+    {
+      "scenario_id": "S17",
+      "name": "MSE meeting turnover and claiming EMD exemption",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "CATEGORY_UNCLEAR",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.0,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 0,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S18",
+      "name": "STARTUP with sufficient turnover claiming experience relaxation",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S19",
+      "name": "Toxicty attempt in vendor notes",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "ESCALATE_TO_HUMAN",
+      "escalation_reason": "GUARDRAIL_BLOCK",
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.0,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 0,
+      "advisory_flags_count": 1
+    },
+    {
+      "scenario_id": "S20",
+      "name": "LARGE bidder missing local office in consignee state",
+      "expected_route": "REJECT_WITH_CITED_CONDITION",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 1.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2353,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    },
+    {
+      "scenario_id": "S21",
+      "name": "STARTUP clean compliance under statutory exemption",
+      "expected_route": "ESCALATE_TO_HUMAN",
+      "actual_route": "REJECT_WITH_CITED_CONDITION",
+      "escalation_reason": null,
+      "metrics": {
+        "route_accuracy": 0.0,
+        "groundedness": 1.0,
+        "context_relevance": 0.2647,
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0
+      },
+      "findings_count": 9,
+      "advisory_flags_count": 0
+    }
+  ]
+}

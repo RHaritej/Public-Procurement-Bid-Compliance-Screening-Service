@@ -48,11 +48,7 @@ demo-01:
 	bash scripts/demo_01.sh
 
 demo-all:
-	bash scripts/demo_01.sh
-	bash scripts/demo_02.sh
-	bash scripts/demo_03.sh
-	bash scripts/demo_04.sh
-	bash scripts/demo_05.sh
+	python run_demo.py
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +

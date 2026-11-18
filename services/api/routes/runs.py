@@ -19,13 +19,13 @@ from bidscreen_common.logging import get_logger
 from bidscreen_common.metrics import RUNS_TOTAL
 from bidscreen_contracts.enums import EscalationReason, Route, RunStatus
 try:
+    from services.api.quarantine import QuarantineService
+    from services.api.ratelimit import RateLimiter
+    from services.api.validation import validate_bid_summary
+except ImportError:
     from bidscreen_api.quarantine import QuarantineService
     from bidscreen_api.ratelimit import RateLimiter
     from bidscreen_api.validation import validate_bid_summary
-except ImportError:
-    from quarantine import QuarantineService
-    from ratelimit import RateLimiter
-    from validation import validate_bid_summary
 
 router = APIRouter(tags=["Screenings"])
 logger = get_logger("bidscreen.api.routes", service="bidscreen-api")
@@ -126,18 +126,43 @@ async def submit_screening(
     if idempotency_key:
         IDEMPOTENCY_STORE[idempotency_key] = run_id
 
+    # Persist in Redis so Celery worker and polling API share state
+    redis_client = getattr(request.app.state, "redis", None)
+    if redis_client:
+        try:
+            await redis_client.set(f"bidscreen:run:{run_id}", json.dumps(run_data), ex=86400)
+        except Exception as e:
+            logger.warning("redis_set_failed", error=str(e), run_id=run_id)
+
     # 5. Dispatch task to Celery worker (or run inline if worker not active)
     dispatched_to_celery = False
-    try:
-        from bidscreen_worker.tasks import screen_bid_task
-        screen_bid_task.delay(run_id, bid.model_dump(mode="json"), correlation_id)
-        dispatched_to_celery = True
-    except Exception as e:
-        logger.info("celery_dispatch_skipped_fallback_inline", error=str(e), run_id=run_id)
+    if getattr(request.app.state, "redis", None) is not None:
+        try:
+            from services.worker.tasks import screen_bid_task
+            screen_bid_task.apply_async(
+                args=[run_id, bid.model_dump(mode="json"), correlation_id],
+                retry=False,
+            )
+            dispatched_to_celery = True
+        except Exception as e:
+            logger.info("celery_dispatch_skipped_fallback_inline", error=str(e), run_id=run_id)
 
     # If Celery couldn't be reached (e.g. testing without redis broker), simulate worker queue
     if not dispatched_to_celery:
-        logger.info("run_queued_in_memory", run_id=run_id)
+        logger.info("executing_in_process_fallback", run_id=run_id)
+        try:
+            from packages.agents.graph import run_screening
+            result = run_screening(run_id=run_id, bid=bid, correlation_id=correlation_id)
+            RUNS_STORE[run_id]["status"] = RunStatus.COMPLETED
+            RUNS_STORE[run_id]["result"] = result.model_dump(mode="json")
+        except Exception as e:
+            try:
+                from services.worker.tasks import _run_walking_skeleton
+                result = _run_walking_skeleton(bid, run_id, correlation_id)
+                RUNS_STORE[run_id]["status"] = RunStatus.COMPLETED
+                RUNS_STORE[run_id]["result"] = result.model_dump(mode="json")
+            except Exception as e2:
+                logger.warning("inline_execution_failed", error=str(e2), run_id=run_id)
 
     RUNS_TOTAL.labels(status="QUEUED", route="NONE").inc()
 
@@ -160,8 +185,20 @@ async def submit_screening(
     "/runs/{run_id}",
     include_in_schema=False,
 )
-async def get_screening(run_id: str):
-    run = RUNS_STORE.get(run_id)
+async def get_screening(run_id: str, request: Request):
+    run = None
+    redis_client = getattr(request.app.state, "redis", None)
+    if redis_client:
+        try:
+            cached = await redis_client.get(f"bidscreen:run:{run_id}")
+            if cached:
+                run = json.loads(cached)
+        except Exception as e:
+            logger.warning("redis_get_failed", error=str(e), run_id=run_id)
+
+    if not run:
+        run = RUNS_STORE.get(run_id)
+
     if not run:
         raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
 
@@ -175,9 +212,9 @@ async def get_screening(run_id: str):
         "updated_at": run["updated_at"],
     }
 
-    if run["status"] == RunStatus.COMPLETED and run["result"] is not None:
+    if str(run.get("status")) in ("COMPLETED", RunStatus.COMPLETED.value) and run.get("result") is not None:
         response.update(run["result"])
-    elif run["status"] == RunStatus.FAILED:
+    elif str(run.get("status")) in ("FAILED", RunStatus.FAILED.value):
         response["error_message"] = run.get("error_message")
 
     return response
@@ -191,8 +228,20 @@ async def get_screening(run_id: str):
     "/v1/screenings/{run_id}/trace",
     include_in_schema=False,
 )
-async def get_run_trace(run_id: str):
-    run = RUNS_STORE.get(run_id)
+async def get_run_trace(run_id: str, request: Request):
+    run = None
+    redis_client = getattr(request.app.state, "redis", None)
+    if redis_client:
+        try:
+            cached = await redis_client.get(f"bidscreen:run:{run_id}")
+            if cached:
+                run = json.loads(cached)
+        except Exception:
+            pass
+
+    if not run:
+        run = RUNS_STORE.get(run_id)
+
     if not run:
         raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
 

@@ -1,24 +1,37 @@
-"""bidscreen_contracts – shared Pydantic models and enums for the Bid Compliance Screening Service."""
-
-from importlib.metadata import PackageNotFoundError, version
-
-try:
-    __version__ = version("bidscreen_contracts")
-except PackageNotFoundError:
-    __version__ = "0.0.0"
+"""bidscreen_contracts package - Single Source of Truth for Data Contracts."""
 
 from bidscreen_contracts.enums import (
     BidderCategory,
+    CircuitState,
+    ClientType,
     CorpusScope,
+    DocumentType,
+    EmdMode,
     EscalationReason,
     FindingStatus,
     MandatoryCondition,
+    MseClass,
     Route,
     RunStatus,
 )
-from bidscreen_contracts.bid_summary import BidSummary, BidderInfo
-from bidscreen_contracts.finding import Citation, ScreeningFinding
-from bidscreen_contracts.run import RunSubmission, RunStatusModel, ScreeningResult
+from bidscreen_contracts.bid_summary import (
+    BidderInfo,
+    BidSummary,
+    EmdDetails,
+    Experience,
+    Financials,
+    FinancialYearTurnover,
+    Manpower,
+    SimilarService,
+)
+from bidscreen_contracts.finding import Citation, Finding, ScreeningFinding
+from bidscreen_contracts.run import (
+    RunStatusModel,
+    RunSubmission,
+    ScreeningResult,
+    StepMetrics,
+    TokenCostMetrics,
+)
 from bidscreen_contracts.tools import (
     CheckThresholdInput,
     CheckThresholdOutput,
@@ -28,11 +41,13 @@ from bidscreen_contracts.tools import (
     GetBidFieldsOutput,
     GetClauseInput,
     GetClauseOutput,
+    Passage,
     SearchCorpusInput,
     SearchCorpusOutput,
 )
 
 __all__ = [
+    # Enums
     "BidderCategory",
     "Route",
     "FindingStatus",
@@ -40,13 +55,32 @@ __all__ = [
     "RunStatus",
     "CorpusScope",
     "MandatoryCondition",
+    "CircuitState",
+    "EmdMode",
+    "DocumentType",
+    "ClientType",
+    "MseClass",
+    # BidSummary
     "BidSummary",
     "BidderInfo",
+    "Financials",
+    "FinancialYearTurnover",
+    "Experience",
+    "SimilarService",
+    "EmdDetails",
+    "Manpower",
+    # Findings
     "Citation",
+    "Finding",
     "ScreeningFinding",
+    # Runs
     "RunSubmission",
     "RunStatusModel",
     "ScreeningResult",
+    "StepMetrics",
+    "TokenCostMetrics",
+    # Tools
+    "Passage",
     "SearchCorpusInput",
     "SearchCorpusOutput",
     "GetClauseInput",
